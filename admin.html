@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard - Doraemon Control</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #1e1e2f; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: #2d2d44; padding: 30px; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    h2 { color: #00a0e9; margin-bottom: 20px; text-align: center; }
+    .group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; font-weight: bold; }
+    input[type="file"] { background: #3b3b54; padding: 10px; border-radius: 6px; width: 100%; color: white; border: 1px solid #555; }
+    button { width: 100%; background: #00a0e9; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    button:hover { background: #0080c0; }
+    .status { margin-top: 15px; font-size: 13px; text-align: center; color: #4caf50; display: none; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Doraemon Admin Panel</h2>
+  
+  <div class="group">
+    <label>1. Anywhere Door Media (Image/Video)</label>
+    <input type="file" id="doorInput" accept="image/*,video/*">
+  </div>
+
+  <div class="group">
+    <label>2. Time Machine Media (Image/Video)</label>
+    <input type="file" id="timeInput" accept="image/*,video/*">
+  </div>
+
+  <button onclick="broadcastUploads()">Send to Birthday Site</button>
+  <div class="status" id="statusMsg">Media Broadcasted Successfully!</div>
+</div>
+
+<script>
+  const syncChannel = new BroadcastChannel('doraemon_admin_channel');
+
+  function broadcastUploads() {
+    const doorFile = document.getElementById('doorInput').files[0];
+    const timeFile = document.getElementById('timeInput').files[0];
+
+    if (doorFile) processAndSend(doorFile, 'door');
+    if (timeFile) processAndSend(timeFile, 'time');
+
+    const status = document.getElementById('statusMsg');
+    status.style.display = 'block';
+    setTimeout(() => status.style.display = 'none', 3000);
+  }
+
+  function processAndSend(file, target) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      syncChannel.postMessage({
+        target: target,
+        mediaType: file.type,
+        dataUrl: e.target.result
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+</script>
+</body>
+</html>
